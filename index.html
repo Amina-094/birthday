@@ -194,12 +194,8 @@
         }
 
         @keyframes flicker {
-            0% {
-                transform: rotate(-8deg) scale(0.92);
-            }
-            100% {
-                transform: rotate(8deg) scale(1.08);
-            }
+            0% { transform: rotate(-8deg) scale(0.92); }
+            100% { transform: rotate(8deg) scale(1.08); }
         }
 
         .candle.out .flame {
@@ -355,9 +351,14 @@
 </head>
 
 <body>
+
     <div class="stars"></div>
 
+    <!-- Birthday song -->
+    <audio id="birthdaySong" src="birthday-song.mp3" preload="auto"></audio>
+
     <main class="container">
+
         <h1>🎉 Happy Birthday! 🎉</h1>
 
         <p class="subtitle">
@@ -365,6 +366,7 @@
         </p>
 
         <div class="cake-area">
+
             <div class="plate"></div>
 
             <div class="cake">
@@ -373,10 +375,6 @@
             </div>
 
             <div class="candles">
-                <div class="candle">
-                    <div class="wick"></div>
-                    <div class="flame"></div>
-                </div>
 
                 <div class="candle">
                     <div class="wick"></div>
@@ -387,10 +385,17 @@
                     <div class="wick"></div>
                     <div class="flame"></div>
                 </div>
+
+                <div class="candle">
+                    <div class="wick"></div>
+                    <div class="flame"></div>
+                </div>
+
             </div>
         </div>
 
         <div class="controls">
+
             <button class="blow-btn" onclick="startMicrophone()">
                 🎤 button ko click kero or phook maro
             </button>
@@ -398,6 +403,7 @@
             <button class="manual-btn" onclick="blowCandles()">
                 ✨ agr phok nhi marni to ye daba do
             </button>
+
         </div>
 
         <p class="status" id="status">
@@ -405,39 +411,53 @@
         </p>
 
         <footer>
-         ---------------------------------------------------------------------------------------------------
+            Made with lots of love 💖
         </footer>
+
     </main>
 
+    <!-- Birthday popup -->
+
     <div class="popup" id="birthdayPopup">
+
         <div class="popup-card">
+
             <div class="big-cake">🎂</div>
 
             <h2>HAPPY BIRTHDAY!</h2>
 
             <p>
                 🎉 Today is YOUR special day! 🎉<br>
-                etc etc esy baton me ap hi achy ho,<br>
-                <br><br>
-                ✨ Never stop dreaming!  ✨
+                Aaj ka din bohat special hai,<br>
+                aur ap bhi bohat special ho! 💖<br><br>
+                Hamesha khush raho, muskurate raho,<br>
+                aur apne dreams ko achieve karo! ✨<br><br>
+                Never stop dreaming! 💕
             </p>
 
             <button class="blow-btn" onclick="relightCandles()">
                 🔥 Make Another Wish
             </button>
+
         </div>
+
     </div>
 
     <script>
+
         let audioContext;
         let microphone;
         let analyser;
         let micStream;
+
         let detectionRunning = false;
         let blowStart = null;
         let lastBlow = 0;
 
+        // Start microphone
+
         async function startMicrophone() {
+
             if (detectionRunning) {
                 document.getElementById("status").textContent =
                     "🎤 Microphone is ready! Blow toward your microphone!";
@@ -445,6 +465,7 @@
             }
 
             try {
+
                 micStream = await navigator.mediaDevices.getUserMedia({
                     audio: true
                 });
@@ -454,6 +475,7 @@
                 )();
 
                 microphone = audioContext.createMediaStreamSource(micStream);
+
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 1024;
 
@@ -467,49 +489,67 @@
                 detectBlow();
 
             } catch (error) {
+
                 document.getElementById("status").textContent =
                     "Microphone unavailable. Try the Blow Candles button!";
+
             }
         }
 
+        // Detect blowing sound
+
         function detectBlow() {
+
             if (!detectionRunning) return;
 
             const data = new Uint8Array(analyser.fftSize);
+
             analyser.getByteTimeDomainData(data);
 
             let sum = 0;
 
             for (let i = 0; i < data.length; i++) {
+
                 const sample = (data[i] - 128) / 128;
+
                 sum += sample * sample;
+
             }
 
             const volume = Math.sqrt(sum / data.length);
+
             const now = Date.now();
 
-            // Loud air blowing usually creates a strong microphone signal.
-            // The threshold may need adjustment for your microphone.
             if (volume > 0.12 && now - lastBlow > 1200) {
+
                 if (blowStart === null) {
                     blowStart = now;
                 }
 
-                // Require a short burst to reduce accidental triggers.
                 if (now - blowStart > 220) {
+
                     lastBlow = now;
                     blowStart = null;
+
                     blowCandles();
+
                     return;
                 }
+
             } else {
+
                 blowStart = null;
+
             }
 
             requestAnimationFrame(detectBlow);
+
         }
 
+        // Blow candles and play birthday song
+
         function blowCandles() {
+
             if (document.getElementById("birthdayPopup").classList.contains("show")) {
                 return;
             }
@@ -523,20 +563,42 @@
 
             document.getElementById("birthdayPopup").classList.add("show");
 
+            // Play birthday song
+
+            const song = document.getElementById("birthdaySong");
+
+            song.currentTime = 0;
+
+            song.play().catch(error => {
+                document.getElementById("status").textContent =
+                    "🎵 Click play on your birthday song if it doesn't start automatically!";
+            });
+
             createConfetti();
+
         }
 
+        // Create confetti
+
         function createConfetti() {
+
             const colors = [
-                "#ff4eac", "#ffe45e", "#5df7ff",
-                "#b388ff", "#7dff9c", "#ffffff"
+                "#ff4eac",
+                "#ffe45e",
+                "#5df7ff",
+                "#b388ff",
+                "#7dff9c",
+                "#ffffff"
             ];
 
             for (let i = 0; i < 110; i++) {
+
                 const piece = document.createElement("div");
 
                 piece.className = "confetti";
+
                 piece.style.left = Math.random() * 100 + "vw";
+
                 piece.style.backgroundColor =
                     colors[Math.floor(Math.random() * colors.length)];
 
@@ -552,19 +614,35 @@
                 document.body.appendChild(piece);
 
                 setTimeout(() => piece.remove(), 6500);
+
             }
+
         }
 
+        // Relight candles and stop music
+
         function relightCandles() {
+
             document.querySelectorAll(".candle").forEach(candle => {
                 candle.classList.remove("out");
             });
 
             document.getElementById("birthdayPopup").classList.remove("show");
 
+            // Stop birthday song
+
+            const song = document.getElementById("birthdaySong");
+
+            song.pause();
+
+            song.currentTime = 0;
+
             document.getElementById("status").textContent =
                 "Bhot Insaan 💖";
+
         }
+
     </script>
+
 </body>
 </html>
